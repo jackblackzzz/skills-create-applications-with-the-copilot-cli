@@ -39,10 +39,34 @@ describe('calculator core compute()', () => {
     }
   });
 
-  test('unknown operation throws EUNKNOWN', () => {
-    expect(() => compute('pow', 2, 3)).toThrow(/Unknown operation/);
+  test('modulo: 10 % 3 = 1', () => {
+    expect(compute('mod', 10, 3)).toBe(1);
+    expect(compute('%', '10', '3')).toBe(1);
+  });
+
+  test('power: 2 ^ 8 = 256', () => {
+    expect(compute('power', 2, 8)).toBe(256);
+    expect(compute('^', '2', '8')).toBe(256);
+  });
+
+  test('squareroot: sqrt 9 = 3', () => {
+    expect(compute('squareroot', 9)).toBe(3);
+    expect(compute('sqrt', '16')).toBe(4);
+  });
+
+  test('squareroot negative throws EINVALID', () => {
+    expect(() => compute('sqrt', -1)).toThrow(/square root of negative number/);
     try {
-      compute('pow', 2, 3);
+      compute('sqrt', -1);
+    } catch (e) {
+      expect(e.code).toBe('EINVALID');
+    }
+  });
+
+  test('unknown operation throws EUNKNOWN', () => {
+    expect(() => compute('unknown_op', 2, 3)).toThrow(/Unknown operation/);
+    try {
+      compute('unknown_op', 2, 3);
     } catch (e) {
       expect(e.code).toBe('EUNKNOWN');
     }

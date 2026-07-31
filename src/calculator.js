@@ -19,16 +19,22 @@ const fs = require('fs');
 function printHelp() {
   console.log(`Usage:
   calculator.js <operation> <number1> <number2>
+  calculator.js sqrt <number>   # squareroot (unary)
 
 Operations:
   add, +        Addition
   subtract, -   Subtraction
   multiply, *   Multiplication
   divide, /     Division
+  mod, %        Modulo
+  pow, ^        Power
+  sqrt          Square root (single operand)
 
 Examples:
   node src/calculator.js add 2 3       # 5
   node src/calculator.js multiply 4 5  # 20
+  node src/calculator.js pow 2 8       # 256
+  node src/calculator.js sqrt 9        # 3
   echo "add 1 2" | node src/calculator.js  # reads from STDIN
 `);
 }
@@ -65,11 +71,27 @@ function handleArgs(args) {
     process.exit(0);
   }
 
+  // Allow unary operations (like sqrt) with a single operand
+  const unaryOps = new Set(['squareroot', 'sqrt']);
+  if (unaryOps.has(op)) {
+    if (args.length < 2) {
+      exitWithError('Error: expected operation and one numeric operand. See --help');
+    }
+    const result = parseAndCompute(op, args[1]);
+    if (typeof result === 'number') console.log(result);
+    return;
+  }
+
   if (args.length < 3) {
     exitWithError('Error: expected operation and two numeric operands. See --help');
   }
 
   const result = parseAndCompute(op, args[1], args[2]);
+  if (typeof result === 'number') {
+    // For integer results, print without trailing .0 when appropriate
+    if (Number.isInteger(result)) console.log(result);
+    else console.log(result);
+  }
   if (typeof result === 'number') {
     // For integer results, print without trailing .0 when appropriate
     if (Number.isInteger(result)) console.log(result);
