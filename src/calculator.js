@@ -33,38 +33,23 @@ Examples:
 `);
 }
 
+const { compute } = require('./lib/calculator-core');
+
 function exitWithError(msg, code = 1) {
   console.error(msg);
   process.exit(code);
 }
 
+// Wrapper used by the CLI that delegates to the pure compute function.
 function parseAndCompute(op, aStr, bStr) {
-  const a = Number(aStr);
-  const b = Number(bStr);
-  if (!Number.isFinite(a) || !Number.isFinite(b)) {
-    exitWithError('Error: both operands must be valid numbers');
-  }
-
-  switch (op) {
-    case 'add':
-    case '+':
-      return a + b;
-    case 'subtract':
-    case '-':
-      return a - b;
-    case 'multiply':
-    case '*':
-    case 'x':
-    case 'X':
-      return a * b;
-    case 'divide':
-    case '/':
-      if (b === 0) {
-        exitWithError('Error: division by zero', 2);
-      }
-      return a / b;
-    default:
-      exitWithError(`Unknown operation: ${op}`);
+  try {
+    return compute(op, aStr, bStr);
+  } catch (err) {
+    // Map known error codes to appropriate exit behavior
+    if (err && err.code === 'EDIVZERO') {
+      exitWithError(`Error: ${err.message}`, 2);
+    }
+    exitWithError(`Error: ${err.message || err}`, 1);
   }
 }
 
